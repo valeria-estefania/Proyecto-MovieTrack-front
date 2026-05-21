@@ -106,11 +106,13 @@ class _StatusScreenState extends State<StatusScreen> with SingleTickerProviderSt
                   contents: _vistos,
                   emptyMessage: 'No has marcado nada como visto',
                   emptyIcon: Icons.check_circle_outline,
+                  onRefresh: _loadStatus, // ← nuevo
                 ),
                 _ContentList(
                   contents: _pendientes,
                   emptyMessage: 'No tienes contenido pendiente',
                   emptyIcon: Icons.bookmark_outline,
+                  onRefresh: _loadStatus, // ← nuevo
                 ),
               ],
             ),
@@ -123,11 +125,13 @@ class _ContentList extends StatelessWidget {
   final List<Content> contents;
   final String emptyMessage;
   final IconData emptyIcon;
+  final VoidCallback onRefresh; // ← nuevo
 
   const _ContentList({
     required this.contents,
     required this.emptyMessage,
     required this.emptyIcon,
+    required this.onRefresh, // ← nuevo
   });
 
   @override
@@ -151,15 +155,20 @@ class _ContentList extends StatelessWidget {
       itemBuilder: (context, index) {
         final content = contents[index];
         return GestureDetector(
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/detail',
-            arguments: {
-              'contentId': content.idContent,
-              'tmdbId': content.tmdbId,
-              'type': content.type,
-            },
-          ),
+          onTap: ()  async {
+  await Navigator.pushNamed(
+    context,
+    '/detail',
+    arguments: {
+      'contentId': content.idContent,
+      'tmdbId': content.tmdbId,
+      'type': content.type,
+    },
+    
+  );
+  onRefresh();
+},
+
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
