@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/bottom_nav.dart';
+import '../../admin/screens/admin_dashboard.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveChanges() async {
-    // Por ahora solo cierra el modo edición
     setState(() => _isEditing = false);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -77,6 +77,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _goToAdminPanel() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AdminDashboard()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
@@ -89,6 +96,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: Center(child: CircularProgressIndicator(color: Color(0xFFE50914))),
       );
     }
+
+    final isAdmin = user.role == 'admin';
 
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
@@ -138,20 +147,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: user.role == 'admin'
+                color: isAdmin
                     ? const Color(0xFFE50914).withOpacity(0.2)
                     : const Color(0xFF1F1F1F),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: user.role == 'admin'
+                  color: isAdmin
                       ? const Color(0xFFE50914)
                       : Colors.grey.withOpacity(0.3),
                 ),
               ),
               child: Text(
-                user.role == 'admin' ? 'Administrador' : 'Usuario',
+                isAdmin ? 'Administrador' : 'Usuario',
                 style: TextStyle(
-                  color: user.role == 'admin'
+                  color: isAdmin
                       ? const Color(0xFFE50914)
                       : Colors.grey,
                   fontSize: 12,
@@ -188,6 +197,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
 
             const SizedBox(height: 32),
+
+            // ── Botón Admin Panel (solo si es admin) ──────────────────
+            if (isAdmin) ...[
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _goToAdminPanel,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE50914),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.admin_panel_settings_rounded,
+                      color: Colors.white),
+                  label: const Text(
+                    'Ir al Panel de Administración',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Formulario edición
             if (_isEditing) ...[
